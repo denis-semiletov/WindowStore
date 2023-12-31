@@ -1,0 +1,42 @@
+﻿@page "/orders"
+@using WindowStore.Client.Services
+@using WindowStore.Shared
+@using WindowStore.Shared.Order;
+
+<PageTitle>Weather forecast</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Orders</MudText>
+<MudText Class="mb-8">This component demonstrates fetching data from the server.</MudText>
+@if (orders == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="orders" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<OrderDTO, object>(x=>x.OrderName)">Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<OrderDTO, object>(x=>x.State)">State</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.OrderName</MudTd>
+            <MudTd DataLabel="State">@context.State</MudTd>
+        </RowTemplate>
+        <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+        </PagerContent>
+     </MudTable>
+}
+
+
+@code {
+    @inject IOrderServiceClient _orderService;
+
+    private IEnumerable<OrderDTO>? orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await _orderService.GetOrders();
+    }
+}
+
