@@ -6,6 +6,6 @@ namespace WindowsStore.BLL.Interfaces
     {
         Task<List<WindowDTO>> GetWindowsAsync();
         Task<WindowDTO> CreateWindowAsync(WindowCreateDTO windowDto);
-        Task RemoveWindowAsync(int windowId);
+        Task<bool> RemoveWindowAsync(int windowId);
     }
 }

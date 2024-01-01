@@ -35,14 +35,14 @@ namespace WindowsStore.BLL.Services
             return dto;
         }
 
-        public async Task RemoveWindowAsync(int windowId)
+        public async Task<bool> RemoveWindowAsync(int windowId)
         {
             var window = await context.Windows.FindAsync(windowId)
                 ?? throw new KeyNotFoundException($"Window with WindowId = {windowId} not found for remove action");
 
             context.Windows.Remove(window);
 
-            await context.SaveChangesAsync();
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }

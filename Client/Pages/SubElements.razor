@@ -1,0 +1,45 @@
+﻿@page "/subElements"
+@using WindowStore.Client.Services
+@using WindowStore.Shared
+@using WindowStore.Shared.SubElement
+
+<PageTitle>SubElements</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">SubElements</MudText>
+<MudText Class="mb-8">This component allows to add and remove subelement from the storage. Notice, that it's possible to remove the subelement if there are no orders with the ordered window, which contains subelements you intended to remove.'.</MudText>
+@if (subElements == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="subElements" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<SubElementDTO, object>(x=>x.Element)">Element</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<SubElementDTO, object>(x=>x.Type)">Type</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<SubElementDTO, object>(x=>x.Width)">Width</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<SubElementDTO, object>(x=>x.Hight)">Hight</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Element">@context.Element</MudTd>
+            <MudTd DataLabel="Type">@context.Type</MudTd>
+            <MudTd DataLabel="Width">@context.Width</MudTd>
+            <MudTd DataLabel="Hight">@context.Hight</MudTd>
+        </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{5, 10}" />
+            </PagerContent>
+        </MudTable>
+}
+
+
+@code {
+    @inject ISubElementServiceClient _subElementService;
+
+    private IEnumerable<SubElementDTO>? subElements;
+
+    protected override async Task OnInitializedAsync()
+    {
+        subElements = await _subElementService.GetSubElements();
+    }
+}

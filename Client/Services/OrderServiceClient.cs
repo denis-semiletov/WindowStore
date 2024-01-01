@@ -7,44 +7,58 @@ namespace WindowStore.Client.Services
 {
     public class OrderServiceClient(HttpClient httpClient) : IOrderServiceClient
     {
+        public async Task<OrderedWindowSubElementDTO?> AddSubElementToOrderAsync(AddSubElementToOrderedWindowDTO addSubElementToOrderedWindowDTO)
+        {
+            var response = await httpClient.PostAsJsonAsync("/api/orders/subElement", addSubElementToOrderedWindowDTO);
+
+            return await response.Content.ReadFromJsonAsync<OrderedWindowSubElementDTO>();
+        }
+
+        public async Task<OrderedWindowDTO?> AddWindowToOrderAsync(AddWindowToOrderDTO addWindowToOrderDTO)
+        {
+            var response = await httpClient.PostAsJsonAsync("/api/orders/window", addWindowToOrderDTO);
+
+            return await response.Content.ReadFromJsonAsync<OrderedWindowDTO>();
+        }
+
+        public async Task<OrderDTO?> CreateOrderAsync(OrderCreateDTO orderCreteDTO)
+        {
+            var response = await httpClient.PostAsJsonAsync("/api/orders", orderCreteDTO);
+
+            return await response.Content.ReadFromJsonAsync<OrderDTO>();
+        }
+
         public async Task<IEnumerable<OrderDTO>?> GetOrders()
         {
             return await httpClient.GetFromJsonAsync<IEnumerable<OrderDTO>>("/api/orders/all");
         }
 
-        public Task AddSubElementToOrderAsync(AddSubElementToOrderedWindowDTO addSubElementToOrderedWindowDTO)
+        public async Task<bool> RemoveOrderAsync(int orderId)
         {
-            throw new NotImplementedException();
+            var response = await httpClient.DeleteAsync($"/api/orders/{orderId}");
+
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
 
-        public Task AddWindowToOrderAsync(AddWindowToOrderDTO addWindowToOrderDTO)
+        public async Task<bool> RemoveSubElementFromOrderAsync(int orderedSubElementId)
         {
-            throw new NotImplementedException();
+            var response = await httpClient.DeleteAsync($"/api/orders/subElement{orderedSubElementId}");
+
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
 
-        public Task CreateOderAsync(OrderCreateDTO orderCreteDTO)
+        public async Task<bool> RemoveWindowFromOrderAsync(int orderedWindowId)
         {
-            throw new NotImplementedException();
+            var response = await httpClient.DeleteAsync($"/api/orders/window{orderedWindowId}");
+
+            return await response.Content.ReadFromJsonAsync<bool>();
         }
 
-        public Task RemoveOrderAsync(int orderId)
+        public async Task<OrderDTO?> UpdateOrderAsync(OrderUpdateDTO orderUpdateDTO)
         {
-            throw new NotImplementedException();
-        }
+            var response = await httpClient.PutAsJsonAsync("/api/orders", orderUpdateDTO);
 
-        public Task RemoveSubElementFromOrderAsync(int orderedSubElementId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveWindowFromOrderAsync(int orderedWindowId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task UpdateOderAsync(OrderUpdateDTO orderUpdateDTO)
-        {
-            throw new NotImplementedException();
+            return await response.Content.ReadFromJsonAsync<OrderDTO>();
         }
     }
 }

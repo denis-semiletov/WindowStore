@@ -6,7 +6,7 @@ namespace WindowsStore.BLL.Interfaces
     {
         Task<List<SubElementDTO>> GetSubElements();
         Task<SubElementDTO> CreateSubElementAsync(SubElementCreateDTO subElementCreateDTO);
-        Task UpdateSubElementAsync(SubElementUpdateDTO subElementUpdateDTO);
-        Task SubElementRemoveAsync(int subElementId);
+        Task<SubElementDTO> UpdateSubElementAsync(SubElementUpdateDTO subElementUpdateDTO);
+        Task<bool> SubElementRemoveAsync(int subElementId);
     }
 }

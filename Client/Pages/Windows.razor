@@ -1,0 +1,41 @@
+﻿@page "/windows"
+@using WindowStore.Client.Services
+@using WindowStore.Shared
+@using WindowStore.Shared.Window
+
+<PageTitle>Windows</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Windows</MudText>
+<MudText Class="mb-8">This component allows to add and remove windows from the storage. Notice, that it's possible to remove the window if there are no orders with the ordered window you intended to remove.'.</MudText>
+@if (windows == null)
+{
+    <MudProgressCircular Color="Color.Default" Indeterminate="true" />
+}
+else
+{
+    <MudTable Items="windows" Hover="true" SortLabel="Sort By" Elevation="0">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<WindowDTO, object>(x=>x.WindowName)">Name</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<WindowDTO, object>(x=>x.QuantityOfWindows)">QuantityOfWindows</MudTableSortLabel></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.WindowName</MudTd>
+                <MudTd DataLabel="QuantityOfWindows">@context.QuantityOfWindows</MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new int[]{5, 10}" />
+            </PagerContent>
+        </MudTable>
+}
+
+
+@code {
+    @inject IWindowServiceClient _windowService;
+
+    private IEnumerable<WindowDTO>? windows;
+
+    protected override async Task OnInitializedAsync()
+    {
+        windows = await _windowService.GetWindowsAsync();
+    }
+}

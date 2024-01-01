@@ -7,12 +7,12 @@ namespace WindowsStore.BLL.Interfaces
     public interface IOrderService
     {
         Task<List<OrderDTO>> GetOrders();
-        Task UpdateOderAsync(OrderUpdateDTO orderUpdateDTO);
-        Task CreateOderAsync(OrderCreateDTO orderCreteDTO);
-        Task RemoveOrderAsync(int orderId);
-        Task AddWindowToOrderAsync(AddWindowToOrderDTO addWindowToOrderDTO);
-        Task RemoveWindowFromOrderAsync(int orderedWindowId);
-        Task AddSubElementToOrderAsync(AddSubElementToOrderedWindowDTO addSubElementToOrderedWindowDTO);
-        Task RemoveSubElementFromOrderAsync(int orderedSubElementId);
+        Task<OrderDTO> UpdateOrderAsync(OrderUpdateDTO orderUpdateDTO);
+        Task<OrderDTO> CreateOrderAsync(OrderCreateDTO orderCreteDTO);
+        Task<bool> RemoveOrderAsync(int orderId);
+        Task<OrderedWindowDTO> AddWindowToOrderAsync(AddWindowToOrderDTO addWindowToOrderDTO);
+        Task<bool> RemoveWindowFromOrderAsync(int orderedWindowId);
+        Task<OrderedWindowSubElementDTO> AddSubElementToOrderAsync(AddSubElementToOrderedWindowDTO addSubElementToOrderedWindowDTO);
+        Task<bool> RemoveSubElementFromOrderAsync(int orderedSubElementId);
     }
 }

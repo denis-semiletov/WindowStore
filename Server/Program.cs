@@ -29,6 +29,10 @@ builder.Services.AddDbContext<BlazorWindowStoreContext>(options =>
 
 builder.Services.AddScoped<IOrderService, OrderService>();
 
+builder.Services.AddScoped<IWindowService, WindowService>();
+
+builder.Services.AddScoped<ISubElementService, SubElementService>();
+
 builder.Services.AddMudServices();
 
 builder.Services.AddAutoMapper((serviceProvider, automapper) =>

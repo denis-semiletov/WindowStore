@@ -2,18 +2,111 @@
 @using WindowStore.Client.Services
 @using WindowStore.Shared
 @using WindowStore.Shared.Order;
+@using WindowStore.Shared.OrderedWindow
+@using WindowStore.Shared.Window
 
-<PageTitle>Weather forecast</PageTitle>
+<PageTitle>Orders</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">Orders</MudText>
-<MudText Class="mb-8">This component demonstrates fetching data from the server.</MudText>
 @if (orders == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <MudTable Items="orders" Hover="true" SortLabel="Sort By" Elevation="0">
+	<MudTable Items="@orders" Hover="true" Breakpoint="Breakpoint.Xs">
+		<ColGroup>
+			<col style="width:100px;" />
+			<col />
+			<col style="width:300px;" />
+	</ColGroup>
+	<HeaderContent>
+		<MudTh></MudTh>
+		<MudTh>Name</MudTh>
+		<MudTh>State</MudTh>
+	</HeaderContent>
+	<RowTemplate>
+		<MudTd ><MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => ShowOrderDetails(context))">@((context.IsExpanded == true)? "Hide" : "Show") Order Details</MudButton></MudTd>
+			<MudTd DataLabel="Name">@context.OrderName</MudTd>
+		<MudTd DataLabel="State">@context.State</MudTd>
+	</RowTemplate>
+	<ChildRowContent>
+		@if (context.IsExpanded)
+				{
+				<MudTr>
+					<MudTd></MudTd>
+					<td colspan="2">
+						<MudCard Elevation="0">
+							<MudCardHeader>
+								<CardHeaderContent>
+									<MudText Typo="Typo.body2">Order Details for <strong>@context.OrderName</strong> order</MudText>
+								</CardHeaderContent>
+							</MudCardHeader>
+							<MudCardContent Class="pa-0">
+								<MudTable Items="@context.OrderedWindows" Context="OrderedWindowsContext" Hover="true" Breakpoint="Breakpoint.Xs" Elevation="0">
+									<ColGroup>
+										<col style="width:200px;" />
+										<col />
+										<col />
+									</ColGroup>
+									<HeaderContent>
+										<MudTh></MudTh>
+										<MudTh>WindowName</MudTh>
+										<MudTh>QuantityOfWindows</MudTh>
+									</HeaderContent>
+									<RowTemplate>
+										<MudTd><MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => ShowWindowDetails(OrderedWindowsContext))">@((OrderedWindowsContext.IsExpanded == true) ? "Hide" : "Show") Ordered SubElements</MudButton></MudTd>
+										<MudTd DataLabel="Window Name">@OrderedWindowsContext.Window?.WindowName</MudTd>
+										<MudTd DataLabel="QuantityOfWindows">@OrderedWindowsContext.Window?.QuantityOfWindows</MudTd>
+									</RowTemplate>
+									<ChildRowContent>
+										@if (OrderedWindowsContext.IsExpanded)
+									{
+										<MudTr>
+											<MudTd></MudTd>
+											<td colspan="2">
+												<MudCard Elevation="0">
+													<MudCardHeader>
+														<CardHeaderContent>
+															<MudText Typo="Typo.caption">Ordered SubElements for <strong>@OrderedWindowsContext.Window?.WindowName</strong> window</MudText>
+														</CardHeaderContent>
+													</MudCardHeader>
+													<MudCardContent Class="pa-0">
+														<MudTable Items="@OrderedWindowsContext.OrderedWindowSubElements" Context="OrderedSubElementsContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+															<ColGroup>
+																<col style="width:200px;" />
+																<col style="width:200px;" />
+																<col style="width:200px;" />
+																<col style="width:200px;" />
+															</ColGroup>
+															<HeaderContent>
+																<MudTh>Element</MudTh>
+																<MudTh>Type</MudTh>
+																<MudTh>Width</MudTh>
+																<MudTh>Hight</MudTh>
+															</HeaderContent>
+															<RowTemplate>
+																<MudTd DataLabel="Element">@OrderedSubElementsContext.SubElement?.Element</MudTd>
+																<MudTd DataLabel="Type">@OrderedSubElementsContext.SubElement?.Type</MudTd>
+																<MudTd DataLabel="Width">@OrderedSubElementsContext.SubElement?.Width</MudTd>
+																<MudTd DataLabel="Hight">@OrderedSubElementsContext.SubElement?.Hight</MudTd>
+															</RowTemplate>
+														</MudTable>
+													</MudCardContent>
+												</MudCard>
+											</td>
+										</MudTr>
+									}
+								</ChildRowContent>
+							</MudTable>
+						</MudCardContent>
+					</MudCard>
+				</td>
+			</MudTr>
+			}
+		</ChildRowContent>
+	</MudTable>
+  @*   <MudTable Items="orders" Hover="true" SortLabel="Sort By" Elevation="0">
         <HeaderContent>
             <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<OrderDTO, object>(x=>x.OrderName)">Name</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<OrderDTO, object>(x=>x.State)">State</MudTableSortLabel></MudTh>
@@ -21,11 +114,19 @@ else
         <RowTemplate>
             <MudTd DataLabel="Name">@context.OrderName</MudTd>
             <MudTd DataLabel="State">@context.State</MudTd>
+            <MudPaper Width="300px" Elevation="0">
+                    <MudTreeView Items="@context.OrderedWindows" MultiSelection="true" >
+                        <ItemTemplate Context="Window">
+                            <MudTreeViewItem @bind-Expanded="@Window.IsExpanded" Items="@Window.OrderedWindowSubElements" Value="@Window"
+                             Icon="@context.Icon" Text="@Window.WindowName" EndText="@context.Number?.ToString()" EndTextTypo="@Typo.caption" />
+        </ItemTemplate>
+    </MudTreeView>
+</MudPaper>
         </RowTemplate>
         <PagerContent>
-                <MudTablePager PageSizeOptions="new int[]{50, 100}" />
+                <MudTablePager PageSizeOptions="new int[]{5, 10}" />
         </PagerContent>
-     </MudTable>
+     </MudTable> *@
 }
 
 
@@ -38,5 +139,20 @@ else
     {
         orders = await _orderService.GetOrders();
     }
+
+	private void ShowOrderDetails(OrderDTO order)
+	{
+		if (order != null)
+		{
+			order.IsExpanded = !order.IsExpanded;
+		}
+	}
+	private void ShowWindowDetails(OrderedWindowDTO orderedWindowDTO)
+	{
+		if (orderedWindowDTO != null)
+		{
+			orderedWindowDTO.IsExpanded = !orderedWindowDTO.IsExpanded;
+		}
+	}
 }
 

@@ -35,7 +35,7 @@ namespace WindowsStore.BLL.Services
             return dto;
         }
 
-        public async Task UpdateSubElementAsync(SubElementUpdateDTO subElementUpdateDTO)
+        public async Task<SubElementDTO> UpdateSubElementAsync(SubElementUpdateDTO subElementUpdateDTO)
         {
             var subElement = await context.SubElements.FindAsync(subElementUpdateDTO.SubElementId)
                 ?? throw new KeyNotFoundException($"SubElement with SubElementId = {subElementUpdateDTO.SubElementId} not found for update action");
@@ -45,18 +45,19 @@ namespace WindowsStore.BLL.Services
 
             await context.SaveChangesAsync();
 
+            var dto = _mapper.Map<SubElementDTO>(subElement);
+
+            return dto;
         }
 
-        public async Task SubElementRemoveAsync(int subElementId)
+        public async Task<bool> SubElementRemoveAsync(int subElementId)
         {
             var subElement = await context.SubElements.FindAsync(subElementId)
                 ?? throw new KeyNotFoundException($"SubElement with SubElementId = {subElementId} not found for remove action");
 
             context.SubElements.Remove(subElement);
 
-            await context.SaveChangesAsync();
-
-
+            return await context.SaveChangesAsync() > 0;
         }
 
     }

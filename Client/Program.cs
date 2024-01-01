@@ -16,4 +16,14 @@ builder.Services.AddHttpClient<IOrderServiceClient, OrderServiceClient>(client =
     client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
 });
 
+builder.Services.AddHttpClient<IWindowServiceClient, WindowServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+});
+
+builder.Services.AddHttpClient<ISubElementServiceClient, SubElementServiceClient>(client =>
+{
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+});
+
 await builder.Build().RunAsync();

@@ -7,6 +7,7 @@ namespace WindowStore.Shared.Order
         public int OrderId { get; set; }
         public required string OrderName { get; set; }
         public required string State { get; set; }
+        public bool IsExpanded { get; set; }
         public List<OrderedWindowDTO>? OrderedWindows { get; set; } = [];
     }
 }
