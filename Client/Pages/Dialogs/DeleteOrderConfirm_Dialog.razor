@@ -36,7 +36,7 @@
         var result = await _orderService.RemoveOrderAsync(order.OrderId);
         if (result)
         {
-            Snackbar.Add($"Order {order.OrderName}Deleted", Severity.Success);
+            Snackbar.Add($"Order {order.OrderName} Deleted", Severity.Success);
         }
         MudDialog?.Close(DialogResult.Ok(order.OrderId));
     }
