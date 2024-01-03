@@ -1,0 +1,52 @@
+﻿@using WindowStore.Client.Services
+@using WindowStore.Shared.SubElement
+
+
+<MudDialog>
+	<DialogContent>
+		<EditForm Model="@model" OnValidSubmit="CreateSubElement">
+			<DataAnnotationsValidator />
+			<MudCard>
+				<MudCardContent>
+					<MudNumericField @bind-Value="model.Element" Label="Element" Variant="Variant.Text" Min="(ushort)0" />
+					<MudSelect @bind-Value="model.Type" Label="Type" HelperText="Select type" OpenIcon="@Icons.Material.Filled.Window" AdornmentColor="Color.Secondary">
+						@foreach (SubElementType type in Enum.GetValues(typeof(SubElementType)))
+						{
+							<MudSelectItem Value="@type">@type</MudSelectItem>
+						}
+					</MudSelect>
+
+					<MudNumericField @bind-Value="model.Width" Label="Width" Variant="Variant.Text" Min="(ushort)0" />
+					<MudNumericField @bind-Value="model.Hight" Label="Hight" Variant="Variant.Text" Min="(ushort)0" />
+				</MudCardContent>
+				<MudCardActions>
+					<MudButton OnClick="CancelCreateOrder">Cancel</MudButton>
+					<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+				</MudCardActions>
+			</MudCard>
+		</EditForm>
+	</DialogContent>
+	<DialogActions>
+	</DialogActions>
+</MudDialog>
+
+
+@code {
+
+	@inject ISubElementServiceClient _subElementService;
+	SubElementCreateDTO model = new SubElementCreateDTO();
+
+	[CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+	async Task CreateSubElement(EditContext context)
+	{
+		var result = await _subElementService.CreateSubElementAsync(model);
+
+		MudDialog?.Close(DialogResult.Ok(result));
+
+		StateHasChanged();
+	}
+
+	void CancelCreateOrder() => MudDialog?.Cancel();
+
+}

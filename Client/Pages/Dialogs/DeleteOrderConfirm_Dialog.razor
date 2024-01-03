@@ -1,0 +1,43 @@
+﻿@using WindowStore.Client.Services
+@using WindowStore.Shared.Order
+
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.DeleteForever" Class="mr-3 mb-n1" />
+            The order <strong style="color:red; font-size:18pt">@order?.OrderName</strong> will be deleted
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField Value="@order?.State" Label="State" ReadOnly="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="DeleteOrder">Delete Order</MudButton>
+    </DialogActions>
+</MudDialog>
+@code {
+
+    @inject IOrderServiceClient _orderService;
+
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+    [Parameter] public OrderDTO? order { get; set; }
+
+    private void Cancel()
+    {
+        MudDialog?.Cancel();
+    }
+
+    async Task DeleteOrder()
+    {
+        var result = await _orderService.RemoveOrderAsync(order.OrderId);
+        if (result)
+        {
+            Snackbar.Add($"Order {order.OrderName}Deleted", Severity.Success);
+        }
+        MudDialog?.Close(DialogResult.Ok(order.OrderId));
+    }
+}

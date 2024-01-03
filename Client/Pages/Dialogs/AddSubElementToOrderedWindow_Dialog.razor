@@ -1,0 +1,67 @@
+﻿@using WindowStore.Client.Services
+@using WindowStore.Shared.Order
+@using WindowStore.Shared.OrderedWindow
+@using WindowStore.Shared.OrderedWindowSubElement
+@using WindowStore.Shared.SubElement
+@using WindowStore.Shared.Window
+
+
+
+<MudDialog>
+	<DialogContent>
+		<EditForm Model="@model" OnValidSubmit="AddSubElementToOrder">
+			<DataAnnotationsValidator />
+			<MudCard>
+				<MudCardContent>
+					<MudSelect T="int" HelperText="@value" @bind-Value="@model.SubElementId" Label="SubElements" For="@(() => model.SubElementId)" AdornmentIcon="@Icons.Material.Filled.Search">
+						@if (subElements != null)
+							@foreach (var window in subElements)
+							{
+								<MudSelectItem T="int" Value="@window.SubElementId">@window.Element <span>Type: @window.Type</span>  <span>Width: @window.Width</span> <span>Hight: @window.Hight</span></MudSelectItem>
+							}
+					</MudSelect>
+				</MudCardContent>
+				<MudCardActions>
+					<MudButton OnClick="CancelAddSubElement">Cancel</MudButton>
+					<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Add subelement</MudButton>
+				</MudCardActions>
+			</MudCard>
+		</EditForm>
+	</DialogContent>
+	<DialogActions>
+	</DialogActions>
+</MudDialog>
+
+@code {
+
+	@inject IOrderServiceClient _orderService;
+	@inject ISubElementServiceClient _subElementService;
+
+	List<SubElementDTO>? subElements;
+
+	[CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+	[Parameter] public OrderedWindowDTO orderedWindow { get; set; }
+
+	AddSubElementToOrderedWindowDTO model = new AddSubElementToOrderedWindowDTO();
+
+	private string value { get; set; } = "Nothing selected";
+
+	protected override async Task OnInitializedAsync()
+	{
+		subElements = await _subElementService.GetSubElements();
+	}
+
+	async Task AddSubElementToOrder(EditContext context)
+	{
+		model.OrderedWindowId = orderedWindow.OrderedWindowId;
+		var result = await _orderService.AddSubElementToOrderAsync(model);
+
+		result.SubElement = subElements?.First(w => w.SubElementId == model.SubElementId);
+
+		MudDialog?.Close(DialogResult.Ok(result));
+
+		StateHasChanged();
+	}
+	void CancelAddSubElement() => MudDialog?.Cancel();
+}

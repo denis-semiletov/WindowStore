@@ -1,10 +1,16 @@
-﻿namespace WindowStore.Shared.SubElement
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WindowStore.Shared.SubElement
 {
     public class SubElementCreateDTO
     {
-        public required ushort Element { get; set; }
-        public required ushort Width { get; set; }
-        public required ushort Hight { get; set; }
-        public required SubElementType Type { get; set; }
+        [Required]
+        public ushort Element { get; set; }
+		[Required]
+		public SubElementType Type { get; set; }
+		[Required]
+		public ushort Width { get; set; }
+		[Required]
+		public ushort Hight { get; set; }
     }
 }

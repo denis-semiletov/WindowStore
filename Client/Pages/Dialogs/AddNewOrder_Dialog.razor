@@ -1,0 +1,52 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using WindowStore.Client.Services
+@using WindowStore.Shared.Order
+@inject IOrderServiceClient _orderService;
+
+
+
+<MudDialog>
+	<DialogContent>
+		<EditForm Model="@model" OnValidSubmit="CreateOrder">
+			<DataAnnotationsValidator />
+			<MudCard>
+						<MudCardContent>
+							<MudTextField Label="OrderName" HelperText="Max. 50 Min. 3 characters"
+									  @bind-Value="model.OrderName" For="@(() => model.OrderName)" />
+							<MudSelect @bind-Value="@model.State" Label="State" For="@(() => model.State)" HelperText="Select state" OpenIcon="@Icons.Material.Filled.LocalOffer" AdornmentColor="Color.Secondary">
+								@foreach (var state in _orderService.States)
+								{
+									<MudSelectItem Value="@state.Value">"@state.Key (@state.Value)"</MudSelectItem>
+								}
+							</MudSelect>
+						</MudCardContent>
+					<MudCardActions>
+						<MudButton OnClick="CancelCreateOrder">Cancel</MudButton>
+						<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+					</MudCardActions>
+			 </MudCard>
+		</EditForm>
+		</DialogContent>
+		<DialogActions>
+		</DialogActions>
+	</MudDialog>
+
+@code {
+
+    OrderCreateDTO model = new OrderCreateDTO();
+
+    [CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+	async Task CreateOrder(EditContext context)
+	{
+		var result = await _orderService.CreateOrderAsync(model);
+
+		MudDialog?.Close(DialogResult.Ok(result));
+
+		StateHasChanged();
+    }
+
+    void CancelCreateOrder() => MudDialog?.Cancel();
+
+
+}

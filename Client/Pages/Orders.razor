@@ -1,9 +1,15 @@
-﻿@page "/orders"
+﻿@page "/"
+@using WindowStore.Client.Pages.Dialogs
 @using WindowStore.Client.Services
 @using WindowStore.Shared
 @using WindowStore.Shared.Order;
 @using WindowStore.Shared.OrderedWindow
 @using WindowStore.Shared.Window
+@inject IOrderServiceClient _orderService;
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+
 
 <PageTitle>Orders</PageTitle>
 
@@ -14,82 +20,110 @@
 }
 else
 {
-	<MudTable Items="@orders" Hover="true" Breakpoint="Breakpoint.Xs">
+	<MudTable Items="@orders" Hover="true" Dense="true" Breakpoint="Breakpoint.Xs" CommitEditTooltip="Commit Edit" CanCancelEdit="true"
+			  OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
+			  RowEditCommit="@(async (obj) => await UpdateOrderAync(obj))" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="@applyButtonPosition" EditButtonPosition="@editButtonPosition" EditTrigger="@editTrigger">
 		<ColGroup>
-			<col style="width:100px;" />
+			<col />
 			<col />
 			<col style="width:300px;" />
+			<col style="width:200px;" />
 	</ColGroup>
 	<HeaderContent>
 		<MudTh></MudTh>
 		<MudTh>Name</MudTh>
-		<MudTh>State</MudTh>
+			<MudTh>State</MudTh>
+			<MudTh><MudButton Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" OnClick="@AddOrder">New order</MudButton></MudTh>
 	</HeaderContent>
 	<RowTemplate>
-		<MudTd ><MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => ShowOrderDetails(context))">@((context.IsExpanded == true)? "Hide" : "Show") Order Details</MudButton></MudTd>
+			<MudTd><MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => ShowOrderDetails(context))" Color="Color.Secondary">@((context.IsExpanded == true) ? "Hide" : "Show") ordered windows</MudButton></MudTd>
 			<MudTd DataLabel="Name">@context.OrderName</MudTd>
-		<MudTd DataLabel="State">@context.State</MudTd>
-	</RowTemplate>
+			<MudTd DataLabel="State">@context.State</MudTd>
+			<MudTd><MudIconButton OnClick="@((e) => DeleteOrder(context))" Icon="@Icons.Material.Filled.Delete" aria-label="delete"></MudIconButton></MudTd>
+			</RowTemplate> 
+			<RowEditingTemplate>
+				<MudTd></MudTd>
+				<MudTd DataLabel="OrderName">
+					<MudTextField @bind-Value="@context.OrderName" Required />
+				</MudTd>
+				<MudTd DataLabel="State">
+					<MudSelect @bind-Value="@context.State" Label="State" For="@(() => context.State)" HelperText="Select state" OpenIcon="@Icons.Material.Filled.LocalOffer" AdornmentColor="Color.Secondary">
+						@foreach (var state in _orderService.States)
+						{
+							<MudSelectItem Value="@state.Value">"@state.Key (@state.Value)"</MudSelectItem>
+						}
+					</MudSelect>
+				</MudTd>
+				<MudTd></MudTd>
+			</RowEditingTemplate>
 	<ChildRowContent>
 		@if (context.IsExpanded)
 				{
 				<MudTr>
-					<MudTd></MudTd>
-					<td colspan="2">
+					<td colspan="4">
 						<MudCard Elevation="0">
 							<MudCardHeader>
 								<CardHeaderContent>
 									<MudText Typo="Typo.body2">Order Details for <strong>@context.OrderName</strong> order</MudText>
 								</CardHeaderContent>
 							</MudCardHeader>
-							<MudCardContent Class="pa-0">
-								<MudTable Items="@context.OrderedWindows" Context="OrderedWindowsContext" Hover="true" Breakpoint="Breakpoint.Xs" Elevation="0">
+							<MudCardContent>
+								<MudTable Items="@context.OrderedWindows" Context="OrderedWindowsContext" Hover="true" Breakpoint="Breakpoint.Xs" Elevation="0" Class="ow-1">
 									<ColGroup>
+										<col />
 										<col style="width:200px;" />
 										<col />
 										<col />
+										<col style="width:200px;" />
 									</ColGroup>
 									<HeaderContent>
 										<MudTh></MudTh>
 										<MudTh>WindowName</MudTh>
 										<MudTh>QuantityOfWindows</MudTh>
+										<MudTh>TotalSubElements</MudTh>
+										<MudTh><MudButton Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => AddWindowToOrder(context))">Add window</MudButton></MudTh>
 									</HeaderContent>
 									<RowTemplate>
-										<MudTd><MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => ShowWindowDetails(OrderedWindowsContext))">@((OrderedWindowsContext.IsExpanded == true) ? "Hide" : "Show") Ordered SubElements</MudButton></MudTd>
+										<MudTd><MudButton Variant="Variant.Filled" Size="Size.Small" OnClick="@(() => ShowWindowDetails(OrderedWindowsContext))" Color="Color.Info">@((OrderedWindowsContext.IsExpanded == true) ? "Hide" : "Show") Ordered SubElements</MudButton></MudTd>
 										<MudTd DataLabel="Window Name">@OrderedWindowsContext.Window?.WindowName</MudTd>
 										<MudTd DataLabel="QuantityOfWindows">@OrderedWindowsContext.Window?.QuantityOfWindows</MudTd>
+										<MudTd>@OrderedWindowsContext.OrderedWindowSubElements?.Count</MudTd>
+										<MudTd><MudIconButton OnClick="@((e) => RemoveWindow(context, OrderedWindowsContext.OrderedWindowId))" Icon="@Icons.Material.Filled.Delete" aria-label="delete" /></MudTd>
 									</RowTemplate>
 									<ChildRowContent>
 										@if (OrderedWindowsContext.IsExpanded)
 									{
 										<MudTr>
 											<MudTd></MudTd>
-											<td colspan="2">
+											<td colspan="4">
 												<MudCard Elevation="0">
 													<MudCardHeader>
 														<CardHeaderContent>
 															<MudText Typo="Typo.caption">Ordered SubElements for <strong>@OrderedWindowsContext.Window?.WindowName</strong> window</MudText>
 														</CardHeaderContent>
 													</MudCardHeader>
-													<MudCardContent Class="pa-0">
-														<MudTable Items="@OrderedWindowsContext.OrderedWindowSubElements" Context="OrderedSubElementsContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0">
+													<MudCardContent>
+														<MudTable Items="@OrderedWindowsContext.OrderedWindowSubElements" Context="OrderedSubElementsContext" Hover="true" Breakpoint="Breakpoint.Sm" Elevation="0" Class="ow-2">
 															<ColGroup>
-																<col style="width:200px;" />
-																<col style="width:200px;" />
-																<col style="width:200px;" />
-																<col style="width:200px;" />
+																<col style="width:100px;" />
+																<col />
+																<col style="width:100px;" />
+																<col style="width:100px;" />
+																<col style="width:300px;" />
 															</ColGroup>
 															<HeaderContent>
 																<MudTh>Element</MudTh>
 																<MudTh>Type</MudTh>
 																<MudTh>Width</MudTh>
 																<MudTh>Hight</MudTh>
+																<MudTh><MudButton Variant="Variant.Filled" Color="Color.Tertiary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => AddSubElementToOrderedWindow(OrderedWindowsContext))">Add subelement</MudButton></MudTh>
 															</HeaderContent>
 															<RowTemplate>
 																<MudTd DataLabel="Element">@OrderedSubElementsContext.SubElement?.Element</MudTd>
 																<MudTd DataLabel="Type">@OrderedSubElementsContext.SubElement?.Type</MudTd>
 																<MudTd DataLabel="Width">@OrderedSubElementsContext.SubElement?.Width</MudTd>
 																<MudTd DataLabel="Hight">@OrderedSubElementsContext.SubElement?.Hight</MudTd>
+																<MudTd><MudIconButton OnClick="@((e) => RemoveSubElement(OrderedWindowsContext, OrderedSubElementsContext.Id))" Icon="@Icons.Material.Filled.Delete" aria-label="delete" /></MudTd>
 															</RowTemplate>
 														</MudTable>
 													</MudCardContent>
@@ -105,54 +139,53 @@ else
 			</MudTr>
 			}
 		</ChildRowContent>
+		<PagerContent>
+			<MudTablePager PageSizeOptions="new int[]{5, 10}" />
+		</PagerContent>
 	</MudTable>
-  @*   <MudTable Items="orders" Hover="true" SortLabel="Sort By" Elevation="0">
-        <HeaderContent>
-            <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<OrderDTO, object>(x=>x.OrderName)">Name</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<OrderDTO, object>(x=>x.State)">State</MudTableSortLabel></MudTh>
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd DataLabel="Name">@context.OrderName</MudTd>
-            <MudTd DataLabel="State">@context.State</MudTd>
-            <MudPaper Width="300px" Elevation="0">
-                    <MudTreeView Items="@context.OrderedWindows" MultiSelection="true" >
-                        <ItemTemplate Context="Window">
-                            <MudTreeViewItem @bind-Expanded="@Window.IsExpanded" Items="@Window.OrderedWindowSubElements" Value="@Window"
-                             Icon="@context.Icon" Text="@Window.WindowName" EndText="@context.Number?.ToString()" EndTextTypo="@Typo.caption" />
-        </ItemTemplate>
-    </MudTreeView>
-</MudPaper>
-        </RowTemplate>
-        <PagerContent>
-                <MudTablePager PageSizeOptions="new int[]{5, 10}" />
-        </PagerContent>
-     </MudTable> *@
 }
 
 
 @code {
-    @inject IOrderServiceClient _orderService;
 
-    private IEnumerable<OrderDTO>? orders;
+	private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
+	private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
+	private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
 
-    protected override async Task OnInitializedAsync()
-    {
-        orders = await _orderService.GetOrders();
-    }
-
-	private void ShowOrderDetails(OrderDTO order)
+	private OrderDTO orderBeforeEdit;
+	private void BackupItem(object element)
 	{
-		if (order != null)
-		{
-			order.IsExpanded = !order.IsExpanded;
-		}
+		orderBeforeEdit = new()
+			{
+				OrderName = ((OrderDTO)element).OrderName,
+				State = ((OrderDTO)element).State
+			};
 	}
-	private void ShowWindowDetails(OrderedWindowDTO orderedWindowDTO)
+
+	async Task UpdateOrderAync(object element)
 	{
-		if (orderedWindowDTO != null)
+
+		OrderUpdateDTO orderUpdateDTO = new()
+			{
+				OrderId = ((OrderDTO)element).OrderId,
+				OrderName = ((OrderDTO)element).OrderName,
+				State = ((OrderDTO)element).State
+			};
+
+		var result = await _orderService.UpdateOrderAsync(orderUpdateDTO);
+		if (result != null)
 		{
-			orderedWindowDTO.IsExpanded = !orderedWindowDTO.IsExpanded;
+			var orderUpdate = orders.Find(r => r.OrderId == orderUpdateDTO.OrderId);
+			orderUpdate.OrderName = orderUpdateDTO.OrderName;
+			orderUpdate.State = orderUpdateDTO.State;
 		}
+		Snackbar.Add($"Order {orderUpdateDTO.OrderName} updated", Severity.Success);
+	}
+
+	private void ResetItemToOriginalValues(object element)
+	{
+		((OrderDTO)element).OrderName = orderBeforeEdit.OrderName;
+		((OrderDTO)element).State = orderBeforeEdit.State;
 	}
 }
 

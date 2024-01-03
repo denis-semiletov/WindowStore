@@ -1,31 +1,50 @@
 ﻿@page "/subElements"
+@using WindowStore.Client.Pages.Dialogs
 @using WindowStore.Client.Services
 @using WindowStore.Shared
 @using WindowStore.Shared.SubElement
+@inject ISubElementServiceClient _subElementService;
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
 
 <PageTitle>SubElements</PageTitle>
 
 <MudText Typo="Typo.h3" GutterBottom="true">SubElements</MudText>
-<MudText Class="mb-8">This component allows to add and remove subelement from the storage. Notice, that it's possible to remove the subelement if there are no orders with the ordered window, which contains subelements you intended to remove.'.</MudText>
+<MudText Class="mb-8">This component allows to add and remove subelement from the storage. Notice, that it's possible to remove the subelement if there are no orders with the ordered window, which contains subelements you intended to remove.</MudText>
 @if (subElements == null)
 {
     <MudProgressCircular Color="Color.Default" Indeterminate="true" />
 }
 else
 {
-    <MudTable Items="subElements" Hover="true" SortLabel="Sort By" Elevation="0">
+    <MudTable Items="subElements" Hover="true" SortLabel="Sort By" Elevation="0" CommitEditTooltip="Commit Edit" CanCancelEdit="true"
+              OnCommitEditClick="@(() => Snackbar.Add("Commit Edit Handler Invoked"))" RowEditPreview="BackupItem" RowEditCancel="ResetItemToOriginalValues"
+              RowEditCommit="@(async (obj) => await UpdateSubElementAsync(obj))" IsEditRowSwitchingBlocked="true" ApplyButtonPosition="@applyButtonPosition" EditButtonPosition="@editButtonPosition" EditTrigger="@editTrigger">
         <HeaderContent>
             <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<SubElementDTO, object>(x=>x.Element)">Element</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<SubElementDTO, object>(x=>x.Type)">Type</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<SubElementDTO, object>(x=>x.Width)">Width</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<SubElementDTO, object>(x=>x.Hight)">Hight</MudTableSortLabel></MudTh>
+            <MudTh><MudButton Variant="Variant.Filled" Color="Color.Tertiary" StartIcon="@Icons.Material.Filled.Add" OnClick="@AddSubElement">New subelement</MudButton></MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Element">@context.Element</MudTd>
             <MudTd DataLabel="Type">@context.Type</MudTd>
             <MudTd DataLabel="Width">@context.Width</MudTd>
             <MudTd DataLabel="Hight">@context.Hight</MudTd>
-        </RowTemplate>
+            <MudTd><MudIconButton OnClick="@((e) => DeleteSubElement(context))" Icon="@Icons.Material.Filled.Delete" aria-label="delete"></MudIconButton></MudTd>
+            </RowTemplate>
+            <RowEditingTemplate>
+                <MudTd></MudTd>
+                <MudTd></MudTd>
+                <MudTd DataLabel="Width">
+                    <MudTextField @bind-Value="@context.Width" Required />
+                 </MudTd>
+                 <MudTd DataLabel="Hight">
+                    <MudTextField @bind-Value="@context.Hight" Required />
+                 </MudTd>
+            <MudTd></MudTd>
+        </RowEditingTemplate>
             <PagerContent>
                 <MudTablePager PageSizeOptions="new int[]{5, 10}" />
             </PagerContent>
@@ -34,12 +53,83 @@ else
 
 
 @code {
-    @inject ISubElementServiceClient _subElementService;
 
-    private IEnumerable<SubElementDTO>? subElements;
+    private List<SubElementDTO>? subElements;
 
     protected override async Task OnInitializedAsync()
     {
         subElements = await _subElementService.GetSubElements();
+    }
+
+    async Task AddSubElement()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        var dialog = await DialogService.ShowAsync<AddNewSubElement_Dialog>("Add new subelement", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            if (result.Data is SubElementDTO newSubElement)
+            {
+                subElements?.Add(newSubElement);
+            }
+        }
+    }
+
+    async Task DeleteSubElement(SubElementDTO subElement)
+    {
+        var count = await _subElementService.GetOrdersCountBySubElementIdAsync(subElement.SubElementId);
+
+        if (count > 0)
+        {
+            Snackbar.Add($"SubElement with SubElementId = {subElement.SubElementId} can't be deleted due to {count} orders reference to it!", Severity.Error);
+        }
+        else
+        {
+            var result = await _subElementService.SubElementRemoveAsync(subElement.SubElementId);
+            if (result)
+            {
+                subElements.RemoveAll(w => w.SubElementId == subElement.SubElementId);
+            }
+        }
+    }
+    private TableApplyButtonPosition applyButtonPosition = TableApplyButtonPosition.End;
+    private TableEditButtonPosition editButtonPosition = TableEditButtonPosition.End;
+    private TableEditTrigger editTrigger = TableEditTrigger.RowClick;
+
+    private SubElementDTO subElementBeforeEdit;
+    private void BackupItem(object element)
+    {
+        subElementBeforeEdit = new()
+            {
+                Width = ((SubElementDTO)element).Width,
+                Hight = ((SubElementDTO)element).Hight
+            };
+    }
+
+    async Task UpdateSubElementAsync(object element)
+    {
+
+        SubElementUpdateDTO subElementUpdateDTO = new()
+            {
+                SubElementId = ((SubElementDTO)element).SubElementId,
+                Width = ((SubElementDTO)element).Width,
+                Hight = ((SubElementDTO)element).Hight
+            };
+
+        var result = await _subElementService.UpdateSubElementAsync(subElementUpdateDTO);
+        if (result != null)
+        {
+            var subElementUpdate = subElements.Find(r => r.SubElementId == result.SubElementId);
+            subElementUpdate.Width = result.Width;
+            subElementUpdate.Hight = result.Hight;
+        }
+        Snackbar.Add($"SubElement with SubElementId = {result.SubElementId} has been updated", Severity.Success);
+    }
+
+    private void ResetItemToOriginalValues(object element)
+    {
+        ((SubElementDTO)element).Width = subElementBeforeEdit.Width;
+        ((SubElementDTO)element).Hight = subElementBeforeEdit.Hight;
     }
 }

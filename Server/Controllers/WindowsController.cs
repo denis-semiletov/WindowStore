@@ -12,11 +12,20 @@ namespace WindowStore.Server.Controllers
 
         [HttpGet]
         [Route("all")]
-        public async Task<List<WindowDTO>> GetWidows()
+        public async Task<List<WindowDTO>> GetWindows()
         {
             var orders = await _windowService.GetWindowsAsync();
 
             return orders;
+        }
+
+        [HttpGet]
+        [Route("ordersCount/{windowId}")]
+        public async Task<int> GetOrdersByWindowId(int windowId)
+        {
+            var count = await _windowService.GetOrdersCountByWindowIdAsync(windowId);
+
+            return count;
         }
 
         [HttpPost]

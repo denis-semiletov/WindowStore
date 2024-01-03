@@ -19,6 +19,15 @@ namespace WindowStore.Server.Controllers
             return subElements;
         }
 
+        [HttpGet]
+        [Route("ordersCount/{subElementId}")]
+        public async Task<int> GetOrdersBySubElementId(int subElementId)
+        {
+            var count = await _subElementService.GetOrdersCountBySubElementIdAsync(subElementId);
+
+            return count;
+        }
+
         [HttpPost]
         [Route("")]
         public async Task<SubElementDTO> CreateSubElementAsync(SubElementCreateDTO subElementCreateDTO)

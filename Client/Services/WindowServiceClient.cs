@@ -12,9 +12,14 @@ namespace WindowStore.Client.Services
             return await response.Content.ReadFromJsonAsync<WindowDTO>();
         }
 
-        public async Task<IEnumerable<WindowDTO>?> GetWindowsAsync()
+        public async Task<int> GetOrdersCountByWindowIdAsync(int windowId)
         {
-            return await httpClient.GetFromJsonAsync<IEnumerable<WindowDTO>>("/api/windows/all");
+            return await httpClient.GetFromJsonAsync<int>($"/api/windows/ordersCount/{windowId}");
+        }
+
+        public async Task<List<WindowDTO>?> GetWindowsAsync()
+        {
+            return await httpClient.GetFromJsonAsync<List<WindowDTO>>("/api/windows/all");
         }
 
         public async Task<bool> RemoveWindowAsync(int windowId)

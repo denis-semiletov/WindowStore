@@ -60,5 +60,13 @@ namespace WindowsStore.BLL.Services
             return await context.SaveChangesAsync() > 0;
         }
 
+        public async Task<int> GetOrdersCountBySubElementIdAsync(int subElementId)
+        {
+            var count = await context.Orders
+                .Include(r => r.OrderedWindows).ThenInclude(g => g.OrderedWindowSubElements)
+                .CountAsync(o => o.OrderedWindows.Any(f => f.OrderedWindowSubElements.Any(w => w.SubElementId == subElementId)));
+
+            return count;
+        }
     }
 }

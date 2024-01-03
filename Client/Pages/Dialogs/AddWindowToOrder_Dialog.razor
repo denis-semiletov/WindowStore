@@ -1,0 +1,65 @@
+﻿@using WindowStore.Client.Services
+@using WindowStore.Shared.Order
+@using WindowStore.Shared.OrderedWindow
+@using WindowStore.Shared.Window
+
+
+
+<MudDialog>
+	<DialogContent>
+		<EditForm Model="@model" OnValidSubmit="AddWindowToOrder">
+			<DataAnnotationsValidator />
+			<MudCard>
+				<MudCardContent>
+					<MudSelect T="int" HelperText="@value" @bind-Value="@model.WindowId" Label="Windows" For="@(() => model.WindowId)" AdornmentIcon="@Icons.Material.Filled.Search">
+						@if (windows != null)
+						@foreach (var window in windows)
+						{
+								<MudSelectItem T="int" Value="@window.WindowId">@window.WindowName <span>Quantity: @window.QuantityOfWindows</span></MudSelectItem>
+						}
+					</MudSelect>
+				</MudCardContent>
+				<MudCardActions>
+					<MudButton OnClick="CancelAddWindow">Cancel</MudButton>
+					<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Add window</MudButton>
+				</MudCardActions>
+			</MudCard>
+		</EditForm>
+	</DialogContent>
+	<DialogActions>
+	</DialogActions>
+</MudDialog>
+
+@code {
+
+	@inject IOrderServiceClient _orderService;
+	@inject IWindowServiceClient _windowService;
+
+	List<WindowDTO>? windows;
+
+	[CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+	[Parameter] public OrderDTO order { get; set; }
+
+	AddWindowToOrderDTO model = new AddWindowToOrderDTO();
+
+	private string value { get; set; } = "Nothing selected";
+
+	protected override async Task OnInitializedAsync()
+	{
+		windows = await _windowService.GetWindowsAsync();
+	}
+
+	async Task AddWindowToOrder(EditContext context)
+	{
+		model.OrderId = order.OrderId;
+		var result = await _orderService.AddWindowToOrderAsync(model);
+
+		result.Window = windows?.First(w => w.WindowId == model.WindowId);
+
+		MudDialog?.Close(DialogResult.Ok(result));
+
+		StateHasChanged();
+	}
+	void CancelAddWindow() => MudDialog?.Cancel();
+}

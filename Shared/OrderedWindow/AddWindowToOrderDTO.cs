@@ -1,8 +1,12 @@
-﻿namespace WindowStore.Shared.OrderedWindow
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace WindowStore.Shared.OrderedWindow
 {
     public class AddWindowToOrderDTO
     {
-        public required int OrderId { get; set; }
-        public required int WindowId { get; set; }
+        [Required]
+        public int OrderId { get; set; }
+		[Required]
+		public int WindowId { get; set; }
     }
 }

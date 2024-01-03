@@ -70,7 +70,7 @@ namespace WindowsStore.BLL.Services
         public async Task<bool> RemoveOrderAsync(int orderId)
         {
             var order = await context.Orders.FindAsync(orderId) 
-                ?? throw new KeyNotFoundException($"Order with orderId = {orderId} not found for remove action");
+                ?? throw new KeyNotFoundException($"Order with orderId = {orderId} not found for action remove");
 
             _ = context.Orders.Remove(order);
 
@@ -80,7 +80,7 @@ namespace WindowsStore.BLL.Services
         public async Task<bool> RemoveSubElementFromOrderAsync(int orderedSubElementId)
         {
             var orderedSubElement = await context.OrderedWindowSubElements.FindAsync(orderedSubElementId)
-                ?? throw new KeyNotFoundException($"Ordered SubElement with orderedSubElementId = {orderedSubElementId} not found for remove action");
+                ?? throw new KeyNotFoundException($"Ordered SubElement with orderedSubElementId = {orderedSubElementId} not found for action remove");
 
             _ = context.OrderedWindowSubElements.Remove(orderedSubElement);
 
@@ -90,7 +90,7 @@ namespace WindowsStore.BLL.Services
         public async Task<bool> RemoveWindowFromOrderAsync(int orderedWindowId)
         {
             var orderedWindow = await context.OrderedWindows.FindAsync(orderedWindowId)
-                ?? throw new KeyNotFoundException($"Ordered Window with orderedWindowId = {orderedWindowId} not found for remove action");
+                ?? throw new KeyNotFoundException($"Ordered Window with orderedWindowId = {orderedWindowId} not found for action remove");
 
             _ = context.OrderedWindows.Remove(orderedWindow);
 
@@ -100,7 +100,7 @@ namespace WindowsStore.BLL.Services
         public async Task<OrderDTO> UpdateOrderAsync(OrderUpdateDTO orderUpdateDTO)
         {
             var order = await context.Orders.FindAsync(orderUpdateDTO.OrderId)
-                ?? throw new KeyNotFoundException($"Order with orderId = {orderUpdateDTO.OrderId} not found for update action");
+                ?? throw new KeyNotFoundException($"Order with orderId = {orderUpdateDTO.OrderId} not found for action update");
 
             order = _mapper.Map(orderUpdateDTO, order);
             context.Orders.Update(order);

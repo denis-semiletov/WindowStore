@@ -8,5 +8,6 @@ namespace WindowsStore.BLL.Interfaces
         Task<SubElementDTO> CreateSubElementAsync(SubElementCreateDTO subElementCreateDTO);
         Task<SubElementDTO> UpdateSubElementAsync(SubElementUpdateDTO subElementUpdateDTO);
         Task<bool> SubElementRemoveAsync(int subElementId);
+        Task<int> GetOrdersCountBySubElementIdAsync(int subElementId);
     }
 }

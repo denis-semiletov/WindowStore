@@ -12,6 +12,11 @@ namespace WindowStore.Client.Services
             return await response.Content.ReadFromJsonAsync<SubElementDTO>();
         }
 
+        public async Task<int> GetOrdersCountBySubElementIdAsync(int subElementId)
+        {
+            return await httpClient.GetFromJsonAsync<int>($"/api/subelements/ordersCount/{subElementId}");
+        }
+
         public async Task<List<SubElementDTO>?> GetSubElements()
         {
             return await httpClient.GetFromJsonAsync<List<SubElementDTO>>("/api/subelements/all");
@@ -19,7 +24,7 @@ namespace WindowStore.Client.Services
 
         public async Task<bool> SubElementRemoveAsync(int subElementId)
         {
-            var response = await httpClient.DeleteAsync($"/api/windows/{subElementId}");
+            var response = await httpClient.DeleteAsync($"/api/subelements/{subElementId}");
 
             return await response.Content.ReadFromJsonAsync<bool>();
         }

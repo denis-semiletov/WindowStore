@@ -1,0 +1,45 @@
+﻿@using WindowStore.Client.Services
+@using WindowStore.Shared.Window
+
+
+<MudDialog>
+	<DialogContent>
+		<EditForm Model="@model" OnValidSubmit="CreateWindow">
+			<DataAnnotationsValidator />
+			<MudCard>
+				<MudCardContent>
+					<MudTextField Label="WindowName" HelperText="Max. 50 Min. 3 characters"
+								  @bind-Value="model.WindowName" For="@(() => model.WindowName)" />
+					<MudNumericField @bind-Value="model.QuantityOfWindows" Label="QuantityOfWindows" Variant="Variant.Text" Min="(ushort)0" />
+				</MudCardContent>
+				<MudCardActions>
+					<MudButton OnClick="CancelCreateOrder">Cancel</MudButton>
+					<MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+				</MudCardActions>
+			</MudCard>
+		</EditForm>
+	</DialogContent>
+	<DialogActions>
+	</DialogActions>
+</MudDialog>
+
+
+@code {
+
+	@inject IWindowServiceClient _windowService;
+	WindowCreateDTO model = new WindowCreateDTO();
+
+	[CascadingParameter] MudDialogInstance? MudDialog { get; set; }
+
+	async Task CreateWindow(EditContext context)
+	{
+		var result = await _windowService.CreateWindowAsync(model);
+
+		MudDialog?.Close(DialogResult.Ok(result));
+
+		StateHasChanged();
+	}
+
+	void CancelCreateOrder() => MudDialog?.Cancel();
+
+}

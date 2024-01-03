@@ -6,7 +6,7 @@ namespace WindowStore.Client.Services
 {
     public interface IOrderServiceClient
     {
-        Task<IEnumerable<OrderDTO>?> GetOrders();
+        Task<List<OrderDTO>?> GetOrders();
         Task<OrderDTO?> UpdateOrderAsync(OrderUpdateDTO orderUpdateDTO);
         Task<OrderDTO?> CreateOrderAsync(OrderCreateDTO orderCreteDTO);
         Task<bool> RemoveOrderAsync(int orderId);
@@ -14,5 +14,7 @@ namespace WindowStore.Client.Services
         Task<bool> RemoveWindowFromOrderAsync(int orderedWindowId);
         Task<OrderedWindowSubElementDTO?> AddSubElementToOrderAsync(AddSubElementToOrderedWindowDTO addSubElementToOrderedWindowDTO);
         Task<bool> RemoveSubElementFromOrderAsync(int orderedSubElementId);
-    }
+		Dictionary<string, string> States {  get; }
+
+	}
 }
